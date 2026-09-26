@@ -1,0 +1,10 @@
+# Cross-entropy method (Appendix B.5): 300 candidates, 30 iterations, 30 elites, initial variance 1.0
+_target_: stable_worldmodel.planning.solver.CEMSolver
+cost: ???
+batch_size: 1
+num_samples: 300
+var_scale: 1.0
+n_steps: 30
+topk: 30
+device: cuda
+seed: ${seed}

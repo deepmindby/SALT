@@ -1,0 +1,41 @@
+# Reproduced LeWM baseline: Transformer predictor, one-step objective (Appendix B.7).
+defaults:
+  - _self_
+  - data: pusht
+  - model: lewm
+
+run_name: lewm/${data.env_name}
+
+seed: 0
+split_seed: 3072
+train_split: 0.9
+
+img_size: 224
+embed_dim: 192
+history_size: 3
+num_preds: 1       # training window = 4 frames, one-step targets
+objective: onestep
+
+trainer:
+  max_epochs: 10
+  accelerator: gpu
+  devices: 1
+  precision: bf16
+  gradient_clip_val: 1.0
+
+loader:
+  batch_size: 128
+  num_workers: 6
+  persistent_workers: true
+  prefetch_factor: 3
+  pin_memory: true
+
+optimizer:
+  type: AdamW
+  lr: 5e-5
+  weight_decay: 1e-3
+
+sigreg:
+  weight: 0.09
+  knots: 17
+  num_proj: 1024

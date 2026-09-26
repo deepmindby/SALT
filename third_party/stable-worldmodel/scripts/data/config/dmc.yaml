@@ -1,0 +1,26 @@
+defaults:
+  - _self_
+  - launcher/local
+
+hydra:
+  output_subdir: null
+  mode: MULTIRUN
+  run:
+    dir: .
+
+env_name: swm/CheetahDMControl-v0
+cache_dir: null
+expert_ckpt_path: ../stable-expert/models/sac_dmcontrol
+noise_std: 0.2
+device: cuda
+
+world:
+  num_envs: 10
+  max_episode_steps: 200
+  image_shape: [224, 224]
+
+num_workers: 4
+seed: 3072
+num_traj: 10000
+
+options: null

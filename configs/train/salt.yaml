@@ -1,0 +1,41 @@
+# SALT, paper configuration (Appendix B.2-B.4).
+defaults:
+  - _self_
+  - data: pusht
+  - model: salt
+
+run_name: salt/${data.env_name}
+
+seed: 0            # initialization / training seed
+split_seed: 3072   # 90/10 train-validation split
+train_split: 0.9
+
+img_size: 224
+embed_dim: 192
+history_size: 3    # frames in the evaluation history window
+num_preds: 3       # training window = history_size + num_preds = 6 frames -> K = 5 rollout steps
+objective: rollout # rollout (Eq. 9) | onestep (Eq. 1)
+
+trainer:
+  max_epochs: 10
+  accelerator: gpu
+  devices: 1
+  precision: bf16
+  gradient_clip_val: 1.0
+
+loader:
+  batch_size: 128
+  num_workers: 6
+  persistent_workers: true
+  prefetch_factor: 3
+  pin_memory: true
+
+optimizer:
+  type: AdamW
+  lr: 5e-5
+  weight_decay: 1e-3
+
+sigreg:
+  weight: 0.09
+  knots: 17
+  num_proj: 1024

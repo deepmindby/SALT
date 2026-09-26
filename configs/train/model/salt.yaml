@@ -1,0 +1,35 @@
+_target_: salt.models.JEPA
+
+encoder:
+  _target_: stable_pretraining.backbone.utils.vit_hf
+  size: tiny
+  patch_size: 14
+  image_size: ${img_size}
+  pretrained: false
+  use_mask_token: false
+
+predictor:
+  _target_: salt.models.StateAffineTransition
+  dim: ${embed_dim}
+  cond_dim: ${embed_dim}
+  num_modes: 16      # R in Eq. 8; 0 removes the action-dependent modulation (Appendix F.1)
+  spectral: true     # false: unconstrained dense A_0 (Appendix C.4)
+  s_init: 3.0
+
+action_encoder:
+  _target_: salt.models.ActionEncoder
+  input_dim: ???     # set at runtime: frameskip x action_dim
+  emb_dim: ${embed_dim}
+
+projector:
+  _target_: salt.models.MLP
+  input_dim: ${embed_dim}
+  output_dim: ${embed_dim}
+  hidden_dim: 2048
+  norm_fn:
+    _target_: torch.nn.BatchNorm1d
+    _partial_: true
+
+# The transition acts directly in the regularized latent space; a projection after the
+# predictor would compose with the affine map and break state-affinity (Proposition 2).
+pred_proj: null

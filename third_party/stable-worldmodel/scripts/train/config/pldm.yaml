@@ -1,0 +1,121 @@
+#output_dir: ./outputs
+defaults:
+  - _self_
+  - launcher: local
+  - data: pusht
+
+output_model_name: pldm
+subdir: ${hydra:job.id}
+
+num_workers: 6
+train_split: 0.9
+seed: 3072
+img_size: 224
+patch_size: 14
+encoder_scale: tiny
+encoder_resnet9: False
+train_value_function: False
+projector_loss_weight: 1e-3
+dump_object: True
+
+trainer:
+  max_epochs: 100
+  devices: auto
+  accelerator: gpu
+  precision: bf16
+  gradient_clip_val: 1.0
+
+loader:
+  batch_size: 128
+  num_workers: ${num_workers}
+  drop_last: True
+  persistent_workers: True
+  prefetch_factor: 3
+  pin_memory: True
+  shuffle: True
+
+optimizer:
+  type: AdamW
+  lr: 5e-5
+  weight_decay: 1e-3
+
+wm:
+  type: lewm
+  history_size: 3
+  num_preds: 1
+  embed_dim: 192
+  use_proprio: False
+
+model:
+  _target_: stable_worldmodel.wm.pldm.pldm.PLDM
+  encoder:
+    _target_: stable_pretraining.backbone.utils.vit_hf
+    size: ${encoder_scale}
+    patch_size: ${patch_size}
+    image_size: ${img_size}
+    pretrained: false
+    use_mask_token: false
+  predictor:
+    _target_: stable_worldmodel.wm.pldm.module.Predictor
+    num_frames: ${wm.history_size}
+    input_dim: ${wm.embed_dim}
+    hidden_dim: ${wm.embed_dim}
+    output_dim: ${wm.embed_dim}
+    depth: 6
+    heads: 16
+    mlp_dim: 2048
+    dim_head: 64
+    dropout: 0.1
+    emb_dropout: 0.0
+  action_encoder:
+    _target_: stable_worldmodel.wm.pldm.module.Embedder
+    input_dim: ???
+    emb_dim: ${wm.embed_dim}
+  projector:
+    _target_: stable_worldmodel.wm.pldm.module.MLP
+    input_dim: ${wm.embed_dim}
+    output_dim: ${wm.embed_dim}
+    hidden_dim: 2048
+    norm_fn:
+      _target_: torch.nn.BatchNorm1d
+      _partial_: true
+  pred_proj:
+    _target_: stable_worldmodel.wm.pldm.module.MLP
+    input_dim: ${wm.embed_dim}
+    output_dim: ${wm.embed_dim}
+    hidden_dim: 2048
+    norm_fn:
+      _target_: torch.nn.BatchNorm1d
+      _partial_: true
+
+idm:
+  _target_: stable_worldmodel.wm.pldm.module.MLP
+  input_dim: ???
+  hidden_dim: 512
+  output_dim: ???
+
+loss:
+  sigreg:
+    enabled: true
+    weight: 0.0
+  temp_straight:
+    enabled: false
+    weight: 0.1
+  std:
+    enabled: true
+    weight: 18
+  std_t:
+    enabled: true
+    weight: 0.7
+  cov:
+    enabled: true
+    weight: 12.0
+  cov_t:
+    enabled: true
+    weight: 0.0
+  temp_align:
+    enabled: true
+    weight: 0.2
+  idm:
+    enabled: true
+    weight: 0.0
