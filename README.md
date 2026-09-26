@@ -2,7 +2,7 @@
 
 ## Setup
 
-Linux with an NVIDIA H100 GPU. Run from the repository root:
+Linux with an NVIDIA H100 80GB GPU.
 
 ```bash
 conda env create -f environment.yml
@@ -21,16 +21,27 @@ Follow [LeWorldModel](https://github.com/lucas-maes/le-wm) for dataset download 
 
 ## Pretrained Models
 
-Deploy the extracted `SALT_weights` bundle:
+| Environment  | Checkpoint                                                |
+| ------------ | --------------------------------------------------------- |
+| Two-Room     | [salt-tworoom](https://huggingface.co/ByDM/salt-tworoom)  |
+| Reacher      | [salt-reacher](https://huggingface.co/ByDM/salt-reacher)  |
+| PushT        | [salt-pusht](https://huggingface.co/<hf-user>/salt-pusht) |
+| OGBench-Cube | [salt-cube](https://huggingface.co/<hf-user>/salt-cube)   |
+
+All checkpoints are also grouped in the [SALT collection](https://huggingface.co/collections/ByDM/salt-6ab809f57ee0273c01af653a).
+Download them into the layout expected by `scripts/eval.sh`:
 
 ```bash
-export SALT_WEIGHTS_DIR=/absolute/path/to/SALT_weights
-(cd "$SALT_WEIGHTS_DIR" && sha256sum -c SHA256SUMS)
-for env in tworoom reacher pusht cube; do
-  mkdir -p "$STABLEWM_HOME/checkpoints/salt/$env"
-  cp "$SALT_WEIGHTS_DIR/salt-$env/"{weights.pt,config.json,training_config.yaml} \
-     "$STABLEWM_HOME/checkpoints/salt/$env/"
-done
+python - <<'PY'
+import os
+from huggingface_hub import snapshot_download
+for env in ["tworoom", "reacher", "pusht", "cube"]:
+    snapshot_download(
+        f"<hf-user>/salt-{env}",
+        local_dir=os.path.join(os.environ["STABLEWM_HOME"], "checkpoints", "salt", env),
+        allow_patterns=["weights.pt", "config.json", "training_config.yaml"],
+    )
+PY
 ```
 
 ## Training & Evaluation
