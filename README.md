@@ -1,8 +1,14 @@
-# SALT: State-Affine Latent Transition for Reliable Visual Planning
+# 🧂SALT: State-Affine Latent Transition for Reliable Visual Planning
+
+[![arXiv](https://img.shields.io/badge/arXiv-2609.33595-b31b1b.svg)](https://arxiv.org/abs/2609.33595)
+[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-SALT-yellow)](https://huggingface.co/collections/ByDM/salt)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+Official code for **[Beyond One-Step Accuracy: State-Affine Latent Transition for Reliable Visual Planning](https://arxiv.org/abs/2609.33595)**.
 
 ## Setup
 
-Linux with an NVIDIA H100 80GB GPU.
+Linux with an NVIDIA H100 GPU. Run from the repository root:
 
 ```bash
 conda env create -f environment.yml
@@ -21,15 +27,14 @@ Follow [LeWorldModel](https://github.com/lucas-maes/le-wm) for dataset download 
 
 ## Pretrained Models
 
-| Environment  | Checkpoint                                                |
-| ------------ | --------------------------------------------------------- |
-| Two-Room     | [salt-tworoom](https://huggingface.co/ByDM/salt-tworoom)  |
-| Reacher      | [salt-reacher](https://huggingface.co/ByDM/salt-reacher)  |
-| PushT        | [salt-pusht](https://huggingface.co/<hf-user>/salt-pusht) |
-| OGBench-Cube | [salt-cube](https://huggingface.co/<hf-user>/salt-cube)   |
+| Environment | Checkpoint |
+|---|---|
+| Two-Room | [ByDM/salt-tworoom](https://huggingface.co/ByDM/salt-tworoom) |
+| Reacher | [ByDM/salt-reacher](https://huggingface.co/ByDM/salt-reacher) |
+| PushT | [ByDM/salt-pusht](https://huggingface.co/ByDM/salt-pusht) |
+| OGBench-Cube | [ByDM/salt-cube](https://huggingface.co/ByDM/salt-cube) |
 
-All checkpoints are also grouped in the [SALT collection](https://huggingface.co/collections/ByDM/salt-6ab809f57ee0273c01af653a).
-Download them into the layout expected by `scripts/eval.sh`:
+All checkpoints are grouped in the [SALT collection](https://huggingface.co/collections/ByDM/salt). Download them into the layout expected by `scripts/eval.sh`:
 
 ```bash
 python - <<'PY'
@@ -37,7 +42,7 @@ import os
 from huggingface_hub import snapshot_download
 for env in ["tworoom", "reacher", "pusht", "cube"]:
     snapshot_download(
-        f"<hf-user>/salt-{env}",
+        f"ByDM/salt-{env}",
         local_dir=os.path.join(os.environ["STABLEWM_HOME"], "checkpoints", "salt", env),
         allow_patterns=["weights.pt", "config.json", "training_config.yaml"],
     )
@@ -81,6 +86,23 @@ Paper-reported efficiency on an NVIDIA H100 80GB:
 | SALT (Affine) | 0.70M (×16.5) | 0.29 (×8.1) | 11.4 (×3.1) |
 
 Params and forward time include the projection head. Planning time is averaged over four environments and horizons {5, 10, 15, 20}.
+
+## Citation
+
+```bibtex
+@misc{salt2026,
+  title         = {{Beyond One-Step Accuracy: State-Affine Latent Transition for Reliable Visual Planning}},
+  author        = {Zhang, Boyuan and Du, Yingjun and Zhen, Xiantong and Shao, Ling},
+  year          = {2026},
+  eprint        = {2609.33595},
+  archivePrefix = {arXiv},
+  url           = {https://arxiv.org/abs/2609.33595}
+}
+```
+
+## License
+
+This code is released under the [MIT License](LICENSE). `third_party/stable-worldmodel` retains its original license.
 
 ## Acknowledgments
 
